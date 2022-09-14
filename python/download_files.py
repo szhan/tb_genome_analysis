@@ -56,7 +56,6 @@ def download_files_from_ftp(json_file, ftp_site, out_dir):
         tbi_dest_file = vcf_dest_file + ".tbi"
         urllib.request.urlretrieve(vcf_src_file, vcf_dest_file)
         urllib.request.urlretrieve(tbi_src_file, tbi_dest_file)
-        break
 
 
 if __name__ == "__main__":
