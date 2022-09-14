@@ -10,7 +10,7 @@ import urllib.request
 def parse_json_file(file):
     """
     :param str file: JSON file.
-    :return: Map from sample name to URL of its regenotyped VCF file.
+    :return: Map from sample name to URL of its VCF file.
     :rtype: collections.OrderedDict
     """
     sample_to_vcf = OrderedDict()
@@ -18,11 +18,11 @@ def parse_json_file(file):
     with open(file, "r") as f:
         idx = json.load(f)
         for i in idx:
-            if "regenotyped_vcf" in idx[i]:
+            if "filename" in idx[i]:
                 sample = idx[i]["vcf_sample"]
-                vcf = idx[i]["regenotyped_vcf"]
+                vcf = idx[i]["filename"]
                 assert re.search(sample, vcf),\
-                    f"vcf_sample does not match regenotyped_vcf at {i}"
+                    f"vcf_sample does not match filename at {i}"
                 sample_to_vcf[sample] = vcf
 
     return sample_to_vcf
@@ -45,13 +45,13 @@ def parse_json_file(file):
     "--out_dir", "-o",
     type=click.Path(exists=True, dir_okay=True),
     required=True,
-    help="Directory to store downloaded VCF files"
+    help="Local directory to store VCF files"
 )
 def download_files_from_ftp(json_file, ftp_site, out_dir):
     sample_to_vcf = parse_json_file(json_file)
-    for sample, vcf in sample_to_vcf.items():
-        vcf_src_file = ftp_site + vcf
-        vcf_dest_file = out_dir + sample + ".regeno.vcf.gz"
+    for sample_name, vcf_file in sample_to_vcf.items():
+        vcf_src_file = ftp_site + vcf_file
+        vcf_dest_file = out_dir + sample_name + ".masked.vcf.gz"
         tbi_src_file = vcf_src_file + ".tbi"
         tbi_dest_file = vcf_dest_file + ".tbi"
         urllib.request.urlretrieve(vcf_src_file, vcf_dest_file)
@@ -59,6 +59,6 @@ def download_files_from_ftp(json_file, ftp_site, out_dir):
 
 
 if __name__ == "__main__":
-    #json_file = "data/cryptic-index_February2022.json"
     #ftp_site = "http://ftp.ebi.ac.uk/pub/databases/cryptic/release_june2022/reproducibility/"
+    #json_file = "cryptic-index_February2022.json"
     download_files_from_ftp()
